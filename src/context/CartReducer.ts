@@ -1,8 +1,19 @@
-export const initialState = {
+import type { CartProduct } from "../interface"
+
+export interface CartState {
+    cartItems: CartProduct[]
+}
+
+export const initialState: CartState = {
     cartItems: []
 }
 
-export const CartReducer = (state, action) => {
+export interface CartAction {
+    type: "ADD_TO_CART" | "REMOVE_FROM_CART" | "CLEAR_CART",
+    payload: CartProduct
+}
+
+export const CartReducer = (state: CartState, action: CartAction): CartState => {
 
     switch (action.type) {
         case "ADD_TO_CART": {
@@ -31,20 +42,29 @@ export const CartReducer = (state, action) => {
 
             const itemToRemove = state.cartItems.find((item) => item.id === removeItemId)
 
-            if (itemToRemove.quantity === 1) {
-                return {
-                    ...state,
-                    cartItem: state.cartItems.filter((item) => item.id !== removeItemId)
+            if (itemToRemove) {
+                if (itemToRemove.quantity === 1) {
+                    return {
+                        ...state,
+                        cartItems: state.cartItems.filter((item) => item.id !== removeItemId)
+                    }
+                } else {
+                    return {
+                        ...state,
+                        cartItems: state.cartItems.map((item) => item.id === removeItemId
+                            ?
+                            { ...itemToRemove, quantity: itemToRemove.quantity - 1 }
+                            :
+                            item)
+                    }
                 }
-            } else {
-                return {
-                    ...state,
-                    cartItem: state.cartItems.map((item) => item.id === removeItemId
-                        ?
-                        { ...itemToRemove, quantity: itemToRemove.quantity - 1 }
-                        :
-                        item)
-                }
+            }
+            return state;
+        }
+        case "CLEAR_CART": {
+            return {
+                ...state,
+                cartItems: []
             }
         }
         default:
